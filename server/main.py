@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from routes.auth import router as auth_router
+from routes.transcription import router as transcription_router
 
 app = FastAPI()
 
@@ -14,6 +15,7 @@ app.add_middleware(
 )
 
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
+app.include_router(transcription_router, tags=["transcription"])
 
 
 @app.get("/health")
