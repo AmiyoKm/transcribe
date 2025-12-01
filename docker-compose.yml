@@ -1,0 +1,58 @@
+services:
+    web:
+        build:
+            context: ./web
+            dockerfile: development.Dockerfile
+        ports:
+            - "3000:3000"
+        volumes:
+            - ./web:/app
+            - /app/node_modules
+        environment:
+            - NEXT_PUBLIC_API_URL=http://localhost:8000
+        depends_on:
+            - server
+        networks:
+            - transcribe_network
+
+    server:
+        build:
+            context: ./server
+            dockerfile: development.Dockerfile
+        ports:
+            - "8000:8000"
+        volumes:
+            - ./server:/app
+        environment:
+            - DATABASE_URL=postgresql://user:password@db:5432/transcribe
+            - JWT_SECRET=supersecretkey
+            - JWT_ALGORITHM=HS256
+        depends_on:
+            db:
+                condition: service_healthy
+        networks:
+            - transcribe_network
+
+    db:
+        image: postgres:18.0-alpine3.22
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+        environment:
+            - POSTGRES_USER=user
+            - POSTGRES_PASSWORD=password
+            - POSTGRES_DB=transcribe
+        ports:
+            - "5432:5432"
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U user -d transcribe"]
+            interval: 5s
+            timeout: 5s
+            retries: 5
+        networks:
+            - transcribe_network
+
+volumes:
+    postgres_data:
+networks:
+    transcribe_network:
+        driver: bridge
