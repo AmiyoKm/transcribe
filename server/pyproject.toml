@@ -14,5 +14,6 @@ dependencies = [
     "sqlalchemy",
     "uvicorn",
     "websockets",
-    "email-validator"
+    "email-validator",
+    "alembic"
 ]
