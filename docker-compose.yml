@@ -19,6 +19,8 @@ services:
         build:
             context: ./server
             dockerfile: development.Dockerfile
+        # This command runs migrations before starting the server
+        command: sh -c "alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
         ports:
             - "8000:8000"
         volumes:
