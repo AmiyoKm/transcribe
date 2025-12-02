@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from routes.auth import router as auth_router
+from routes.sessions import router as sessions_router
 from routes.transcription import router as transcription_router
 
 app = FastAPI()
@@ -15,6 +16,7 @@ app.add_middleware(
 )
 
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
+app.include_router(sessions_router, prefix="/sessions", tags=["sessions"])
 app.include_router(transcription_router, prefix="/ws", tags=["transcription"])
 
 
