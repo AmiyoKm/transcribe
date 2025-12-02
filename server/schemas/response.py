@@ -37,3 +37,7 @@ class LoginResponseData(BaseModel):
 
 class LoginResponse(BaseResponse):
     data: LoginResponseData
+
+
+class UserMeResponse(BaseResponse):
+    data: UserSchema

@@ -8,24 +8,36 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
-export default function LoginPage() {
+export default function SignupPage() {
   const router = useRouter()
-  const { login } = useAuth()
+  const { signup } = useAuth()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match")
+      return
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters")
+      return
+    }
+
     setIsLoading(true)
 
     try {
-      await login(email, password)
+      await signup(email, password)
       router.push("/")
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed")
+      setError(err instanceof Error ? err.message : "Signup failed")
     } finally {
       setIsLoading(false)
     }
@@ -36,7 +48,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm space-y-8">
         <div className="text-center">
           <h1 className="text-3xl font-bold text-foreground">Transcriber</h1>
-          <p className="text-muted-foreground mt-2">Real-time voice to text transcription</p>
+          <p className="text-muted-foreground mt-2">Create your account to get started</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -72,16 +84,31 @@ export default function LoginPage() {
             />
           </div>
 
+          <div className="space-y-2">
+            <label htmlFor="confirm-password" className="text-sm font-medium text-foreground">
+              Confirm Password
+            </label>
+            <Input
+              id="confirm-password"
+              type="password"
+              placeholder="••••••••"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              disabled={isLoading}
+            />
+          </div>
+
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Logging in..." : "Login"}
+            {isLoading ? "Creating account..." : "Sign Up"}
           </Button>
         </form>
 
         <div className="text-center">
           <p className="text-sm text-muted-foreground">
-            Don't have an account?{" "}
-            <Link href="/signup" className="text-primary hover:underline">
-              Sign up
+            Already have an account?{" "}
+            <Link href="/login" className="text-primary hover:underline">
+              Login
             </Link>
           </p>
         </div>

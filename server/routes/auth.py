@@ -4,12 +4,14 @@ from sqlalchemy.orm import Session
 from db.base import get_db
 from db.models import User
 from lib.auth import create_access_token, get_password_hash, verify_password
+from middleware.auth import get_current_user
 from schemas.auth import UserLogin, UserSignup
 from schemas.response import (
     LoginResponse,
     LoginResponseData,
     SignUpResponse,
     SignUpResponseData,
+    UserMeResponse,
 )
 from schemas.user import UserSchema
 
@@ -49,4 +51,11 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
     return LoginResponse(
         message="User logged in successfully",
         data=LoginResponseData(access_token=access_token),
+    )
+
+
+@router.get("/me", response_model=UserMeResponse)
+def get_current_user(user: User = Depends(get_current_user)):
+    return UserMeResponse(
+        message="User retrieved successfully", data=UserSchema.model_validate(user)
     )
