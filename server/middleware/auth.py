@@ -1,11 +1,11 @@
-import jwt
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
+from starlette import status
 
-from db.db import get_db
-from lib.constansts import JWT_ALGORITHM, JWT_SECRET
-from models.user import User
+from db.base import get_db
+from db.models import User
+from lib.auth import decode_access_token
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
@@ -18,12 +18,12 @@ def get_current_user(
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    try:
-        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
-        user_id = payload.get("sub")
-        if user_id is None:
-            raise credentials_exception
-    except jwt.PyJWTError:
+    payload = decode_access_token(token)
+    if payload is None:
+        raise credentials_exception
+
+    user_id = payload.get("sub")
+    if user_id is None:
         raise credentials_exception
 
     user = db.query(User).filter(User.id == user_id).first()
