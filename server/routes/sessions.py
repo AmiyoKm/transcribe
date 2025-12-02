@@ -3,16 +3,17 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from db.db import get_db
+from db.base import get_db
+from db.models import Session as SessionModel
+from db.models import User
 from middleware.auth import get_current_user
-from models.response import Response
-from models.sessions import Session as SessionModel
-from models.user import User
+from schemas.response import SessionResponse, SingleSessionResponse
+from schemas.session import SessionSchema
 
 router = APIRouter()
 
 
-@router.get("/", response_model=Response)
+@router.get("/", response_model=SessionResponse)
 def get_sessions(
     skip: int = 0,
     limit: int = 100,
@@ -26,10 +27,13 @@ def get_sessions(
         .limit(limit)
         .all()
     )
-    return {"message": "Sessions retrieved successfully", "data": sessions}
+    return SessionResponse(
+        message="Sessions retrieved successfully",
+        data=[SessionSchema.model_validate(s) for s in sessions],
+    )
 
 
-@router.get("/{session_id}",response_model=Response)
+@router.get("/{session_id}", response_model=SingleSessionResponse)
 def get_session(
     session_id: UUID,
     db: Session = Depends(get_db),
@@ -42,4 +46,8 @@ def get_session(
     )
     if session is None:
         raise HTTPException(status_code=404, detail="Session not found")
-    return session
+
+    return SingleSessionResponse(
+        message="Session retrieved successfully",
+        data=SessionSchema.model_validate(session),
+    )
