@@ -4,12 +4,13 @@ from sqlalchemy.orm import Session
 from db.db import get_db
 from lib.auth import create_access_token, get_password_hash, verify_password
 from models.auth import UserLogin, UserSignup
+from models.response import Response
 from models.user import User
 
 router = APIRouter()
 
 
-@router.post("/signup")
+@router.post("/signup", response_model=Response)
 def signup(user: UserSignup, db: Session = Depends(get_db)):
     db_user = db.query(User).filter(User.email == user.email).first()
     if db_user:
@@ -29,7 +30,7 @@ def signup(user: UserSignup, db: Session = Depends(get_db)):
     return {"message": "User created successfully", "data": data}
 
 
-@router.post("/login")
+@router.post("/login", response_model=Response)
 def login(user: UserLogin, db: Session = Depends(get_db)):
     db_user = db.query(User).filter(User.email == user.email).first()
     if not db_user or not verify_password(user.password, db_user.password_hash):
