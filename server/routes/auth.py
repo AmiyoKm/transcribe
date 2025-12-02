@@ -20,7 +20,13 @@ def signup(user: UserSignup, db: Session = Depends(get_db)):
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-    return {"message": "User created successfully"}
+    data = {
+        "id": new_user.id,
+        "email": new_user.email,
+        "created_at": new_user.created_at.isoformat(),
+    }
+
+    return {"message": "User created successfully", "data": data}
 
 
 @router.post("/login")
@@ -30,4 +36,7 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Invalid credentials")
 
     access_token = create_access_token(data={"sub": str(db_user.id)})
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {
+        "message": "User logged in successfully",
+        "data": {"access_token": access_token, "token_type": "bearer"},
+    }
