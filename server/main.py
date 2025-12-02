@@ -15,12 +15,12 @@ app.add_middleware(
 )
 
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
-app.include_router(transcription_router, tags=["transcription"])
+app.include_router(transcription_router, prefix="/ws", tags=["transcription"])
 
 
 @app.get("/health")
 def read_health():
-    return {"status": "ok"}
+    return {"status": "ok", "message": "Transcribe Server Running on port 8000"}
 
 
 @app.get("/")

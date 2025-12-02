@@ -19,12 +19,10 @@ class TranscriptionService:
     def __init__(
         self,
         websocket: WebSocket,
-        model_size: str = "tiny",
-        device: str = "cpu",
-        compute_type: str = "int8",
+        model: WhisperModel,
     ):
         self.websocket = websocket
-        self.model = WhisperModel(model_size, device=device, compute_type=compute_type)
+        self.model = model
         self.buffer = bytearray()
         self.last_sent_len = 0
 
@@ -50,7 +48,8 @@ class TranscriptionService:
         while True:
             await asyncio.sleep(CHUNK_INTERVAL)
 
-            result = self._transcribe_audio(bytes(self.buffer))
+            result = await asyncio.to_thread(self._transcribe_audio, bytes(self.buffer))
+
             new_text = result["text"][self.last_sent_len :]
             if new_text and new_text != ".":
                 await self.websocket.send_json(
@@ -59,6 +58,7 @@ class TranscriptionService:
                         "language": result["language"],
                         "probability": result["probability"],
                         "length": len(result["text"]),
+                        "transcription": result["text"],
                     }
                 )
                 self.last_sent_len = len(result["text"])
