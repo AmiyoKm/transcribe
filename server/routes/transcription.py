@@ -20,7 +20,7 @@ async def websocket_endpoint(
     db: Session = Depends(get_db),
 ):
     user = get_user_from_token(token, db)
-    print(user)
+
     if user is None:
         await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
         return
