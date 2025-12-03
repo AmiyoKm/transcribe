@@ -12,7 +12,6 @@ const _geistMono = Geist_Mono({ subsets: ["latin"] });
 export const metadata: Metadata = {
 	title: "Transcriber - Real-time Speech to Text",
 	description: "Real-time voice transcription application",
-	generator: "v0.app",
 	icons: {
 		icon: [
 			{

@@ -39,33 +39,29 @@ export class TranscriptionWebSocket {
         this.ws = new WebSocket(this.url)
 
         this.ws.onopen = () => {
-          console.log("[v0] WebSocket connected")
           resolve()
         }
 
         this.ws.onmessage = (event) => {
           try {
             const data: WebSocketMessage = JSON.parse(event.data)
-            console.log("[v0] WebSocket message received:", data)
 
             if (data.type === "final") {
               this.onFinal?.(data as FinalPayload)
+              this.disconnect()
             } else if (data.type === "partial") {
               this.onPartial?.((data as PartialUpdate).partial)
             }
           } catch (error) {
-            console.error("[v0] Failed to parse message:", error)
           }
         }
 
         this.ws.onerror = (error) => {
-          console.error("[v0] WebSocket error:", error)
           this.onError?.("Connection error")
           reject(error)
         }
 
         this.ws.onclose = () => {
-          console.log("[v0] WebSocket disconnected")
         }
       } catch (error) {
         reject(error)
@@ -76,6 +72,12 @@ export class TranscriptionWebSocket {
   sendAudio(audioData: Blob): void {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(audioData)
+    }
+  }
+
+  sendStopMessage(): void {
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify({ type: "stop" }))
     }
   }
 
