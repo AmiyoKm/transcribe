@@ -63,8 +63,6 @@ export default function SessionPage() {
 		fetchSession();
 	}, [sessionId, isAuthenticated]);
 
-
-
 	const confirmDelete = async () => {
 		setShowDeleteAlert(false);
 		setIsDeleting(true);
@@ -75,9 +73,7 @@ export default function SessionPage() {
 			router.push("/");
 		} catch (err) {
 			setError(
-				err instanceof Error
-					? err.message
-					: "Failed to delete session",
+				err instanceof Error ? err.message : "Failed to delete session",
 			);
 		} finally {
 			setIsDeleting(false);
@@ -111,7 +107,6 @@ export default function SessionPage() {
 	}
 
 	const startDate = new Date(session.start_time);
-	const endDate = new Date(session.end_time);
 	const duration = session.duration_seconds;
 	const minutes = Math.floor(duration / 60);
 	const seconds = duration % 60;
@@ -144,10 +139,7 @@ export default function SessionPage() {
 						onOpenChange={setShowDeleteAlert}
 					>
 						<AlertDialogTrigger asChild>
-							<Button
-								variant="destructive"
-								disabled={isDeleting}
-							>
+							<Button variant="destructive" disabled={isDeleting}>
 								{isDeleting ? "Deleting..." : "Delete Session"}
 							</Button>
 						</AlertDialogTrigger>

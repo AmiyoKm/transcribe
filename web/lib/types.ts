@@ -12,8 +12,8 @@ export interface Session {
   duration_seconds: number
   final_transcript: string
   word_count: number
-  language?: string
-  model_used?: string
+  language: string
+  model_used: string
   created_at: string
   updated_at: string
 }

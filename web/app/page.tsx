@@ -11,7 +11,7 @@ import { FinalizingLoader } from "@/components/transcription/finalizing-loader";
 
 export default function HomePage() {
 	const router = useRouter();
-	const { isAuthenticated, user, isLoading: authLoading } = useAuth();
+	const { isAuthenticated, isLoading: authLoading } = useAuth();
 	const [isRecording, setIsRecording] = useState(false);
 	const [displayText, setDisplayText] = useState("");
 	const [error, setError] = useState("");
@@ -46,6 +46,7 @@ export default function HomePage() {
 			setError("");
 			setDisplayText("");
 
+			// getting the media stream and referecing the recorder
 			const stream = await navigator.mediaDevices.getUserMedia({
 				audio: true,
 			});
@@ -57,9 +58,11 @@ export default function HomePage() {
 				throw new Error("No authentication token");
 			}
 
+			// initialiing the websocket and setting the reference
 			const ws = new TranscriptionWebSocket(token);
 			wsRef.current = ws;
-
+			
+			// setting up the callback functions for the ws object 
 			ws.setOnPartial((partialText: string) => {
 				setDisplayText((prev) => prev + partialText);
 			});
@@ -70,7 +73,8 @@ export default function HomePage() {
 				setError(error);
 				stopRecording();
 			});
-
+			
+			// connecting to the ws and starting the user media recording
 			await ws.connect();
 			mediaRecorder.start(100);
 
@@ -99,7 +103,8 @@ export default function HomePage() {
 			if (mediaRecorderRef.current) {
 				mediaRecorderRef.current.stop();
 			}
-
+			
+			// send stop message to server
 			if (wsRef.current) {
 				wsRef.current.sendStopMessage();
 				setIsFinalizing(true);

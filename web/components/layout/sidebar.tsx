@@ -34,7 +34,7 @@ export function Sidebar() {
   return (
     <aside className={cn("border-r border-border bg-background transition-all duration-300", isOpen ? "w-64" : "w-20")}>
       <div className="flex flex-col h-full">
-        {/* Toggle Button */}
+
         <div className="flex items-center justify-between h-16 px-4 border-b border-border">
           {isOpen && <span className="text-sm font-semibold">Sessions</span>}
           <Button variant="ghost" size="sm" onClick={() => setIsOpen(!isOpen)} className="ml-auto">
@@ -42,7 +42,7 @@ export function Sidebar() {
           </Button>
         </div>
 
-        {/* Sessions List */}
+
         <div className="flex-1 overflow-y-auto">
           {isLoading ? (
             <div className="p-4">

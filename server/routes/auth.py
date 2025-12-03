@@ -43,7 +43,9 @@ def signup(user: UserSignup, db: Session = Depends(get_db)):
 @router.post("/login", response_model=LoginResponse)
 def login(user: UserLogin, db: Session = Depends(get_db)):
     db_user = db.query(User).filter(User.email == user.email).first()
-    if not db_user or not verify_password(user.password, db_user.password_hash):
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if not verify_password(user.password, db_user.password_hash):
         raise HTTPException(status_code=400, detail="Invalid credentials")
 
     access_token = create_access_token(data={"sub": str(db_user.id)})
@@ -55,7 +57,7 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
 
 
 @router.get("/me", response_model=UserMeResponse)
-def get_current_user(user: User = Depends(get_current_user)):
+def me(user: User = Depends(get_current_user)):
     return UserMeResponse(
         message="User retrieved successfully", data=UserSchema.model_validate(user)
     )
