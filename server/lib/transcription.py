@@ -1,7 +1,7 @@
 import asyncio
 import io
 import json
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Optional, TypedDict, cast
 
 from fastapi import WebSocket, WebSocketDisconnect
@@ -33,7 +33,7 @@ class TranscriptionService:
         self.user = user
         self.buffer = bytearray()
         self.last_sent_len = 0
-        self.start_time = datetime.utcnow()
+        self.start_time = datetime.now(UTC)
         self.final_transcript: str = ""
         self.language: str = "en"
         self.model_used: str = "faster-whisper-tiny"
@@ -120,7 +120,7 @@ class TranscriptionService:
         await self.websocket.send_json(final_payload)
 
     def _save_session(self) -> tuple[Optional[UUID], dict]:
-        end_time = datetime.utcnow()
+        end_time = datetime.now(UTC)
         duration = int((end_time - self.start_time).total_seconds())
         word_count = len(self.final_transcript.split())
 

@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "server"
 version = "0.1.0"
@@ -17,3 +21,14 @@ dependencies = [
     "email-validator",
     "alembic"
 ]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-cov",
+    "httpx",
+    "pytest-asyncio",
+]
+
+[tool.setuptools.packages.find]
+include = ["alembic", "db", "lib", "middleware", "routes", "schemas"]
