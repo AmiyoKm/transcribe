@@ -19,16 +19,9 @@ dependencies = [
     "uvicorn",
     "websockets",
     "email-validator",
-    "alembic"
-]
-
-[project.optional-dependencies]
-test = [
+    "alembic",
     "pytest",
     "pytest-cov",
     "httpx",
     "pytest-asyncio",
 ]
-
-[tool.setuptools.packages.find]
-include = ["alembic", "db", "lib", "middleware", "routes", "schemas"]
