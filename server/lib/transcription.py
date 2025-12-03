@@ -106,12 +106,6 @@ class TranscriptionService:
 
         session_id, metadata = self._save_session()
 
-        if not session_id:
-            return
-
-        if not metadata:
-            return
-
         final_payload = {
             "type": "final",
             "session_id": str(session_id) if session_id else None,
@@ -126,8 +120,6 @@ class TranscriptionService:
         await self.websocket.send_json(final_payload)
 
     def _save_session(self) -> tuple[Optional[UUID], dict]:
-        if self.final_transcript == "":
-            return None, {}
         end_time = datetime.utcnow()
         duration = int((end_time - self.start_time).total_seconds())
         word_count = len(self.final_transcript.split())

@@ -78,7 +78,7 @@ export function Sidebar() {
                       </div>
                     ) : (
                       <div className="w-8 h-8 flex items-center justify-center text-xs font-semibold">
-                        {date.slice(-2)}
+                        {date.slice(0, 4)}
                       </div>
                     )}
                   </Link>

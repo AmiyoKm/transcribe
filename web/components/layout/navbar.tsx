@@ -8,7 +8,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ModeToggle } from "@/components/mode-toggle";
+import { AnimatedThemeToggler } from "../ui/animated-theme-toggler";
 
 export function Navbar() {
 	const { user, logout, isAuthenticated } = useAuth();
@@ -24,7 +24,7 @@ export function Navbar() {
 				</Link>
 
 				<div className="flex items-center">
-					<ModeToggle />
+					<AnimatedThemeToggler />
 					{isAuthenticated && user ? (
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
