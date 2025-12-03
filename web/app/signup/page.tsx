@@ -7,35 +7,37 @@ import { useAuth } from "@/lib/auth-context";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { AxiosResponse } from "axios";
 
-export default function LoginPage() {
+export default function SignupPage() {
 	const router = useRouter();
-	const { login } = useAuth();
+	const { signup } = useAuth();
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
+	const [confirmPassword, setConfirmPassword] = useState("");
 	const [error, setError] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setError("");
+
+		if (password !== confirmPassword) {
+			setError("Passwords do not match");
+			return;
+		}
+
+		if (password.length < 6) {
+			setError("Password must be at least 6 characters");
+			return;
+		}
+
 		setIsLoading(true);
 
 		try {
-			await login(email, password);
+			await signup(email, password);
 			router.push("/");
-		} catch (err: unknown) {
-			
-			const response = (err as any)?.response;
-			
-			if (response && response.status === 404) {
-				setError("User not found, Please create an account");
-			} else if (response && response.status === 401) {
-				setError("Invalid credentials");
-			} else {
-				setError(err instanceof Error ? err.message : "Login failed");
-			}
+		} catch (err) {
+			setError(err instanceof Error ? err.message : "Signup failed");
 		} finally {
 			setIsLoading(false);
 		}
@@ -49,7 +51,7 @@ export default function LoginPage() {
 						Transcriber
 					</h1>
 					<p className="text-muted-foreground mt-2">
-						Real-time voice to text transcription
+						Create your account to get started
 					</p>
 				</div>
 
@@ -96,23 +98,41 @@ export default function LoginPage() {
 						/>
 					</div>
 
+					<div className="space-y-2">
+						<label
+							htmlFor="confirm-password"
+							className="text-sm font-medium text-foreground"
+						>
+							Confirm Password
+						</label>
+						<Input
+							id="confirm-password"
+							type="password"
+							placeholder="••••••••"
+							value={confirmPassword}
+							onChange={(e) => setConfirmPassword(e.target.value)}
+							required
+							disabled={isLoading}
+						/>
+					</div>
+
 					<Button
 						type="submit"
 						className="w-full"
 						disabled={isLoading}
 					>
-						{isLoading ? "Logging in..." : "Login"}
+						{isLoading ? "Creating account..." : "Sign Up"}
 					</Button>
 				</form>
 
 				<div className="text-center">
 					<p className="text-sm text-muted-foreground">
-						Don't have an account?{" "}
+						Already have an account?{" "}
 						<Link
-							href="/signup"
+							href="/login"
 							className="text-primary hover:underline"
 						>
-							Sign up
+							Login
 						</Link>
 					</p>
 				</div>
