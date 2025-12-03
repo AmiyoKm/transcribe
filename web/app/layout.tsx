@@ -1,6 +1,5 @@
 import type React from "react";
 import type { Metadata } from "next";
-import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -23,10 +22,7 @@ export default function RootLayout({
 					enableSystem
 					disableTransitionOnChange
 				>
-					<AuthProvider>
-						{children}
-						<Analytics />
-					</AuthProvider>
+					<AuthProvider>{children}</AuthProvider>
 				</ThemeProvider>
 			</body>
 		</html>
