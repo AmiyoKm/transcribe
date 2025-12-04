@@ -1,11 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useAuth } from "@/lib/auth-context";
 import { AppLayout } from "@/components/layout/app-layout";
-import { getApiClient } from "@/lib/api-client";
-import type { Session, SingleSessionResponse } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
@@ -20,82 +17,56 @@ import {
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import SessionsApi from "@/lib/sessions-api";
 
 export default function SessionPage() {
 	const params = useParams();
 	const router = useRouter();
-	const { isAuthenticated, isLoading: authLoading } = useAuth();
-	const [session, setSession] = useState<Session | null>(null);
-	const [isLoading, setIsLoading] = useState(true);
-	const [isDeleting, setIsDeleting] = useState(false);
-	const [error, setError] = useState("");
 	const [showDeleteAlert, setShowDeleteAlert] = useState(false);
-
+	const queryClient = useQueryClient();
 	const sessionId = params.session_id as string;
 
-	useEffect(() => {
-		if (!authLoading && !isAuthenticated) {
-			router.push("/login");
-		}
-	}, [isAuthenticated, authLoading, router]);
+	const {
+		data: sessionData,
+		isLoading: sessionDataLoading,
+		error: sessionDataError,
+	} = useQuery({
+		queryKey: ["session", sessionId],
+		queryFn: () => SessionsApi.getSessionById(sessionId),
+	});
 
-	useEffect(() => {
-		if (!isAuthenticated || !sessionId) return;
-
-		const fetchSession = async () => {
-			try {
-				const client = getApiClient();
-				const response = await client.get<SingleSessionResponse>(
-					`/sessions/${sessionId}`,
-				);
-				setSession(response.data.data);
-			} catch (err) {
-				setError(
-					err instanceof Error
-						? err.message
-						: "Failed to load session",
-				);
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
-		fetchSession();
-	}, [sessionId, isAuthenticated]);
-
-	const confirmDelete = async () => {
-		setShowDeleteAlert(false);
-		setIsDeleting(true);
-		setError("");
-		try {
-			const client = getApiClient();
-			await client.delete(`/sessions/${sessionId}`);
+	const { mutate: deleteMuation, isPending: deletingSession } = useMutation({
+		mutationKey: ["session", sessionId],
+		mutationFn: SessionsApi.deleteSession,
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["session"] });
 			router.push("/");
-		} catch (err) {
-			setError(
-				err instanceof Error ? err.message : "Failed to delete session",
-			);
-		} finally {
-			setIsDeleting(false);
-		}
+		},
+	});
+
+	const confirmDelete = () => {
+		deleteMuation(sessionId);
+		setShowDeleteAlert(false);
 	};
 
-	if (authLoading || isLoading) {
+	if (sessionDataLoading) {
 		return (
 			<AppLayout>
 				<div className="flex items-center justify-center h-full">
-					<p className="text-muted-foreground">Loading...</p>
+					<p className="text-muted-foreground">Loading session...</p>
 				</div>
 			</AppLayout>
 		);
 	}
 
-	if (error || !session) {
+	if (sessionDataError || !sessionData) {
 		return (
 			<AppLayout>
 				<div className="flex flex-col items-center justify-center h-full space-y-4">
 					<p className="text-destructive">
-						{error || "Session not found"}
+						{sessionDataError?.response?.data.detail ||
+							"Session not found"}
 					</p>
 					<Button onClick={() => router.push("/")}>
 						<ArrowLeft className="w-4 h-4 mr-2" />
@@ -106,8 +77,8 @@ export default function SessionPage() {
 		);
 	}
 
-	const startDate = new Date(session.start_time);
-	const duration = session.duration_seconds;
+	const startDate = new Date(sessionData.data.start_time);
+	const duration = sessionData.data.duration_seconds;
 	const minutes = Math.floor(duration / 60);
 	const seconds = duration % 60;
 
@@ -139,8 +110,13 @@ export default function SessionPage() {
 						onOpenChange={setShowDeleteAlert}
 					>
 						<AlertDialogTrigger asChild>
-							<Button variant="destructive" disabled={isDeleting}>
-								{isDeleting ? "Deleting..." : "Delete Session"}
+							<Button
+								variant="destructive"
+								disabled={deletingSession}
+							>
+								{deletingSession
+									? "Deleting..."
+									: "Delete Session"}
 							</Button>
 						</AlertDialogTrigger>
 						<AlertDialogContent>
@@ -186,7 +162,7 @@ export default function SessionPage() {
 						</CardHeader>
 						<CardContent>
 							<p className="text-2xl font-bold text-foreground">
-								{session.word_count}
+								{sessionData.data.word_count}
 							</p>
 						</CardContent>
 					</Card>
@@ -199,7 +175,7 @@ export default function SessionPage() {
 						</CardHeader>
 						<CardContent>
 							<p className="text-2xl font-bold text-foreground">
-								{session.language || "English"}
+								{sessionData.data.language || "English"}
 							</p>
 						</CardContent>
 					</Card>
@@ -211,7 +187,7 @@ export default function SessionPage() {
 					</CardHeader>
 					<CardContent>
 						<p className="text-foreground leading-relaxed whitespace-pre-wrap">
-							{session.final_transcript}
+							{sessionData.data.final_transcript}
 						</p>
 					</CardContent>
 				</Card>

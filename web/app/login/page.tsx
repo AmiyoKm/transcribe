@@ -3,42 +3,35 @@
 import type React from "react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/lib/auth-context";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { AxiosResponse } from "axios";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import AuthApi from "@/lib/auth-api";
 
 export default function LoginPage() {
 	const router = useRouter();
-	const { login } = useAuth();
-	const [email, setEmail] = useState("");
-	const [password, setPassword] = useState("");
-	const [error, setError] = useState("");
-	const [isLoading, setIsLoading] = useState(false);
+	const queryClient = useQueryClient();
+	const [email, setEmail] = useState("omimondol18@gmail.com");
+	const [password, setPassword] = useState("password123");
+
+	const { mutate, isPending, error } = useMutation({
+		mutationKey: ["login"],
+		mutationFn: AuthApi.login,
+		onSuccess: (data) => {
+			localStorage.setItem("access_token", data.data.access_token);
+			queryClient.invalidateQueries({ queryKey: ["user"] });
+			router.push("/");
+		},
+		onError: (error) => {
+			console.error(error);
+		},
+	});
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		setError("");
-		setIsLoading(true);
-
-		try {
-			await login(email, password);
-			router.push("/");
-		} catch (err: unknown) {
-			
-			const response = (err as any)?.response;
-			
-			if (response && response.status === 404) {
-				setError("User not found, Please create an account");
-			} else if (response && response.status === 401) {
-				setError("Invalid credentials");
-			} else {
-				setError(err instanceof Error ? err.message : "Login failed");
-			}
-		} finally {
-			setIsLoading(false);
-		}
+		if (!email || !password) return;
+		mutate({ email, password });
 	};
 
 	return (
@@ -56,7 +49,7 @@ export default function LoginPage() {
 				<form onSubmit={handleSubmit} className="space-y-4">
 					{error && (
 						<div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
-							{error}
+							{error.response?.data.detail}
 						</div>
 					)}
 
@@ -74,7 +67,7 @@ export default function LoginPage() {
 							value={email}
 							onChange={(e) => setEmail(e.target.value)}
 							required
-							disabled={isLoading}
+							disabled={isPending}
 						/>
 					</div>
 
@@ -92,16 +85,16 @@ export default function LoginPage() {
 							value={password}
 							onChange={(e) => setPassword(e.target.value)}
 							required
-							disabled={isLoading}
+							disabled={isPending}
 						/>
 					</div>
 
 					<Button
 						type="submit"
 						className="w-full"
-						disabled={isLoading}
+						disabled={isPending}
 					>
-						{isLoading ? "Logging in..." : "Login"}
+						{isPending ? "Logging in..." : "Login"}
 					</Button>
 				</form>
 

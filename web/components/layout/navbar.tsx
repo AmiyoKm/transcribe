@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
-import { useAuth } from "@/lib/auth-context";
+import { useRouter } from "next/navigation";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
@@ -9,9 +10,22 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { AnimatedThemeToggler } from "../ui/animated-theme-toggler";
+import AuthApi from "@/lib/auth-api";
 
 export function Navbar() {
-	const { user, logout, isAuthenticated } = useAuth();
+	const router = useRouter();
+	const queryClient = useQueryClient();
+	const { data: userData, isSuccess: isAuthenticated } = useQuery({
+		queryKey: ["user"],
+		queryFn: AuthApi.me,
+		retry: false,
+	});
+
+	const logout = () => {
+		localStorage.removeItem("access_token");
+		queryClient.invalidateQueries({ queryKey: ["user"] });
+		router.push("/login");
+	};
 
 	return (
 		<nav className="border-b border-border bg-background">
@@ -25,14 +39,14 @@ export function Navbar() {
 
 				<div className="flex items-center">
 					<AnimatedThemeToggler />
-					{isAuthenticated && user ? (
+					{isAuthenticated && userData?.data ? (
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
 								<Button
 									variant="ghost"
 									className="text-foreground"
 								>
-									{user.email}
+									{userData.data.email}
 								</Button>
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="end">
