@@ -3,19 +3,33 @@
 import type React from "react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/lib/auth-context";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import AuthApi from "@/lib/auth-api";
 
 export default function SignupPage() {
 	const router = useRouter();
-	const { signup } = useAuth();
+	const queryClient = useQueryClient();
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [confirmPassword, setConfirmPassword] = useState("");
 	const [error, setError] = useState("");
-	const [isLoading, setIsLoading] = useState(false);
+
+	const { mutate, isPending } = useMutation({
+		mutationKey: ["signup"],
+		mutationFn: AuthApi.register,
+		onSuccess: (data) => {
+			localStorage.setItem("access_token", data.data.access_token);
+			queryClient.invalidateQueries({ queryKey: ["user"] });
+			router.push("/");
+		},
+		onError: (err) => {
+			console.error(err);
+			setError(err.response?.data.detail || "An error occurred");
+		},
+	});
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -31,16 +45,10 @@ export default function SignupPage() {
 			return;
 		}
 
-		setIsLoading(true);
-
-		try {
-			await signup(email, password);
-			router.push("/");
-		} catch (err) {
-			setError(err instanceof Error ? err.message : "Signup failed");
-		} finally {
-			setIsLoading(false);
-		}
+		mutate({
+			email,
+			password,
+		});
 	};
 
 	return (
@@ -76,7 +84,7 @@ export default function SignupPage() {
 							value={email}
 							onChange={(e) => setEmail(e.target.value)}
 							required
-							disabled={isLoading}
+							disabled={isPending}
 						/>
 					</div>
 
@@ -94,7 +102,7 @@ export default function SignupPage() {
 							value={password}
 							onChange={(e) => setPassword(e.target.value)}
 							required
-							disabled={isLoading}
+							disabled={isPending}
 						/>
 					</div>
 
@@ -112,16 +120,16 @@ export default function SignupPage() {
 							value={confirmPassword}
 							onChange={(e) => setConfirmPassword(e.target.value)}
 							required
-							disabled={isLoading}
+							disabled={isPending}
 						/>
 					</div>
 
 					<Button
 						type="submit"
 						className="w-full"
-						disabled={isLoading}
+						disabled={isPending}
 					>
-						{isLoading ? "Creating account..." : "Sign Up"}
+						{isPending ? "Creating account..." : "Sign Up"}
 					</Button>
 				</form>
 

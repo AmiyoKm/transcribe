@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/lib/auth-context";
 import { AppLayout } from "@/components/layout/app-layout";
 import { RecordingButton } from "@/components/transcription/recording-button";
 import { TranscriptionDisplay } from "@/components/transcription/transcription-display";
@@ -11,7 +10,6 @@ import { FinalizingLoader } from "@/components/transcription/finalizing-loader";
 
 export default function HomePage() {
 	const router = useRouter();
-	const { isAuthenticated, isLoading: authLoading } = useAuth();
 	const [isRecording, setIsRecording] = useState(false);
 	const [displayText, setDisplayText] = useState("");
 	const [error, setError] = useState("");
@@ -19,12 +17,6 @@ export default function HomePage() {
 
 	const wsRef = useRef<TranscriptionWebSocket | null>(null);
 	const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-
-	useEffect(() => {
-		if (!authLoading && !isAuthenticated) {
-			router.push("/login");
-		}
-	}, [isAuthenticated, authLoading, router]);
 
 	const handleFinalPayload = useCallback(
 		(payload: FinalPayload) => {
@@ -123,16 +115,6 @@ export default function HomePage() {
 			startRecording();
 		}
 	};
-
-	if (authLoading) {
-		return (
-			<AppLayout>
-				<div className="flex items-center justify-center h-full">
-					<p className="text-muted-foreground">Loading...</p>
-				</div>
-			</AppLayout>
-		);
-	}
 
 	return (
 		<AppLayout>

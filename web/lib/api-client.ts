@@ -1,44 +1,43 @@
-import axios, { type AxiosInstance } from "axios";
+"use client";
 
-const API_BASE_URL =
-	process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+import axios from "axios";
 
-let apiClient: AxiosInstance | null = null;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-export function initializeApiClient(token?: string) {
-	apiClient = axios.create({
-		baseURL: API_BASE_URL,
-		headers: {
-			"Content-Type": "application/json",
-			...(token && { Authorization: `Bearer ${token}` }),
-		},
-	});
+const api = axios.create({
+	baseURL: API_BASE_URL,
+	headers: {
+		"Content-Type": "application/json",
+	},
+});
 
-	apiClient.interceptors.response.use(
-		(response) => response,
-		(error) => {
-			if (error.response?.status === 401) {
-				// Clear auth on 401
-				if (typeof window !== "undefined") {
-					localStorage.removeItem("access_token");
-					window.location.href = "/login";
-				}
+api.interceptors.request.use(
+	(config) => {
+		if (typeof window !== "undefined") {
+			const token = window.localStorage.getItem("access_token");
+			if (token) {
+				config.headers.Authorization = `Bearer ${token}`;
 			}
-			return Promise.reject(error);
-		},
-	);
+		}
+		return config;
+	},
+	(error) => {
+		return Promise.reject(error);
+	},
+);
 
-	return apiClient;
-}
+api.interceptors.response.use(
+	(response) => response,
+	(error) => {
+		if (error.response?.status === 401) {
+			// Clear auth on 401 and redirect to login
+			if (typeof window !== "undefined") {
+				window.localStorage.removeItem("access_token");
+				window.location.href = "/login";
+			}
+		}
+		return Promise.reject(error);
+	},
+);
 
-export function getApiClient(): AxiosInstance {
-	if (!apiClient) {
-		initializeApiClient();
-	}
-	return apiClient!;
-}
-
-export function setAuthToken(token: string) {
-	const client = getApiClient();
-	client.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-}
+export default api;
