@@ -29,7 +29,9 @@ export class TranscriptionWebSocket {
 		this.token = token;
 		const apiUrl =
 			process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-		const wsUrl = apiUrl.replace("http", "ws");
+		const wsUrl = apiUrl.replace(/^http(s?):/, (match, p1) =>
+			p1 === "s" ? "wss:" : "ws:",
+		);
 		this.url = `${wsUrl}/ws/transcribe?token=${token}`;
 	}
 
