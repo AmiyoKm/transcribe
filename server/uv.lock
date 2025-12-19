@@ -1023,20 +1023,16 @@ dependencies = [
     { name = "email-validator" },
     { name = "fastapi" },
     { name = "faster-whisper" },
+    { name = "httpx" },
     { name = "psycopg2-binary" },
     { name = "pydantic-settings" },
     { name = "pyjwt" },
-    { name = "sqlalchemy" },
-    { name = "uvicorn" },
-    { name = "websockets" },
-]
-
-[package.optional-dependencies]
-test = [
-    { name = "httpx" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
     { name = "pytest-cov" },
+    { name = "sqlalchemy" },
+    { name = "uvicorn" },
+    { name = "websockets" },
 ]
 
 [package.metadata]
@@ -1046,18 +1042,17 @@ requires-dist = [
     { name = "email-validator" },
     { name = "fastapi" },
     { name = "faster-whisper" },
-    { name = "httpx", marker = "extra == 'test'" },
+    { name = "httpx" },
     { name = "psycopg2-binary" },
     { name = "pydantic-settings" },
     { name = "pyjwt" },
-    { name = "pytest", marker = "extra == 'test'" },
-    { name = "pytest-asyncio", marker = "extra == 'test'" },
-    { name = "pytest-cov", marker = "extra == 'test'" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "pytest-cov" },
     { name = "sqlalchemy" },
     { name = "uvicorn" },
     { name = "websockets" },
 ]
-provides-extras = ["test"]
 
 [[package]]
 name = "setuptools"

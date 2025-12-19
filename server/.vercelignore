@@ -1,0 +1,14 @@
+.dockerignore
+development.Dockerfile
+production.Dockerfile
+tests
+.venv
+alembic
+*.log
+__pycache__
+*.pyc
+.git
+.env
+uv.lock
+server.egg-info
+alembic.ini

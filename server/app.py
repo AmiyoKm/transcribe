@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from lib.config import settings
 from routes.auth import router as auth_router
 from routes.sessions import router as sessions_router
 from routes.transcription import router as transcription_router

@@ -1,0 +1,12 @@
+bcrypt
+fastapi
+faster-whisper
+psycopg2-binary
+pyjwt
+pydantic-settings
+sqlalchemy
+uvicorn
+websockets
+email-validator
+alembic
+httpx

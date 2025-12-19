@@ -5,3 +5,5 @@ __pycache__
 
 GEMINI.md
 node_modules
+.env
+server.egg-info

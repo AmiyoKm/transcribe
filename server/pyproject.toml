@@ -25,3 +25,8 @@ dependencies = [
     "httpx",
     "pytest-asyncio",
 ]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["db*", "lib*", "routes*", "schemas*", "alembic*", "middleware*"]
+exclude = ["tests*"]

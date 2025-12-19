@@ -26,7 +26,7 @@ services:
         volumes:
             - ./server:/app
         environment:
-            - DATABASE_URL=postgresql://user:password@db:5432/transcribe
+            - DATABASE_URL=postgresql://neondb_owner:npg_yfTGBhJ7go3V@ep-rough-bread-a1lqkez6-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
             - JWT_SECRET=supersecretkey
             - JWT_ALGORITHM=HS256
         depends_on:
